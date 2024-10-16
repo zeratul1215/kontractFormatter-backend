@@ -20,3 +20,56 @@ rad.json
 *.flf
 #Test results file
 TestResults.xml
+
+# Node.js 相关
+node_modules/
+npm-debug.log
+yarn-error.log
+yarn-debug.log
+package-lock.json
+
+# 环境变量文件
+.env
+.env.local
+.env.*.local
+
+# 日志文件
+logs
+*.log
+
+# 运行时数据
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# 依赖目录
+lib-cov
+coverage
+.nyc_output
+
+# Grunt 中间存储
+.grunt
+
+# Bower 依赖目录
+bower_components
+
+# 其他
+.DS_Store
+Thumbs.db
+.idea/
+*.swp
+*.swo
+
+# ssl
+ssl/
+*.key
+*.crt
+*.pem
+*.p12
+*.cer
+*.pfx
+*.p12
+*.pfx
+*.p12
+*.p12
