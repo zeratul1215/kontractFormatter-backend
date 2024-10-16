@@ -74,7 +74,7 @@ exports.signUp = async (req, res, next) => {
 
         // await newUserData.save();
 
-        const token = jwt.sign({ userID: newUser.userID }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        const token = jwt.sign({ userID: newUser.userID }, process.env.JWT_SECRET, { expiresIn: '10000h' });
 
         res.status(201).json({ message: 'User created successfully', JWT: token });
     }
@@ -99,7 +99,7 @@ exports.signIn = async (req, res, next) => {
             return res.status(401).json({ message: 'Invalid password' });
         }
 
-        const token = jwt.sign({ userID: user.userID }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        const token = jwt.sign({ userID: user.userID }, process.env.JWT_SECRET, { expiresIn: '10000h' });
 
         res.status(200).json({ message: 'User signed in successfully', JWT: token });
     }

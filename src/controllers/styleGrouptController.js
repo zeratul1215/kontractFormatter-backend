@@ -16,7 +16,7 @@ exports.createStyleGroup = async (req, res, next) => {
         const userData = await UserData.findOne({ userID: userID });
 
         if(!userData){
-            next(new HttpsError('User not found', 404));
+            next(new HttpsError('User not found', 401));
         }
 
         userData.styleGroups.push(newStyleGroup);
@@ -40,13 +40,13 @@ exports.deleteStyleGroup = async (req, res, next) => {
         const userData = await UserData.findOne({ userID: userID });
 
         if(!userData){
-            next(new HttpsError('User not found'));
+            next(new HttpsError('User not found'), 401);
         }
 
         const styleGroupIndex = userData.styleGroups.findIndex(styleGroup => styleGroup.styleGroupID === styleGroupID);
 
         if (styleGroupIndex === -1) {
-            next(new HttpsError('Style group not found'));
+            next(new HttpsError('Style group not found'),402);
         }
 
         userData.styleGroups.splice(styleGroupIndex, 1);
@@ -68,7 +68,7 @@ exports.getAllStyleGroups = async (req, res, next) => {
         const userData = await UserData.findOne({ userID: userID });
 
         if (!userData) {
-            next(new Error('User not found'));
+            next(new Error('User not found'), 401);
         }
 
         const styleGroupsData = {};
