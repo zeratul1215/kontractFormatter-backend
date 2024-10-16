@@ -23,8 +23,8 @@ app.use(errorHandler);
 connectDB();
 
 const options = {
-    key: fs.readFileSync(path.join(__dirname,"..", "ssl", 'private.key')),
-    cert: fs.readFileSync(path.join(__dirname, "..", "ssl", 'certificate.crt'))
+    key: fs.readFileSync(path.join(__dirname,"..", "ssl", 'localhost-key.pem')),
+    cert: fs.readFileSync(path.join(__dirname, "..", "ssl", 'localhost.pem'))
 };
 
 const PORT = process.env.PORT || 3001;
