@@ -42,7 +42,7 @@ exports.signUp = async (req, res, next) => {
                     versionID: process.env.VERSION_ID,
                     versionName: 'initial version',
                     versionXML: '<xml>Initial Content</xml>',
-                    sectionInfo: {},
+                    sectionInfo: { "test": "test" },
                     styleOfThisVersion: [],
                     numberingStyleOfThisVersion: {
                         numberingStyleID: 'defaultID', // 提供默认值

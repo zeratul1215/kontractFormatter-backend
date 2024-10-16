@@ -6,5 +6,6 @@ const router = express.Router();
 router.post('/createStyleGroup', verifyToken, styleGroupController.createStyleGroup);
 router.post('/deleteStyleGroup', verifyToken, styleGroupController.deleteStyleGroup);
 router.get('/getAllStyleGroups', verifyToken, styleGroupController.getAllStyleGroups);
+router.post('/saveCurrentStylesAsGroup', verifyToken, styleGroupController.saveCurrentStylesAsGroup);
 
 module.exports = router;

@@ -5,15 +5,20 @@ const styleSchema = new Schema({
     styleID: { type: String, required: true },
     styleName: { type: String, required: true },
     data: {
-        chineseFont: String,
-        englishFont: String,
+        fontChineseName: String,
+        fontEnglishName: String,
         fontSize: Number,
-        bold: Boolean,
-        italic: Boolean,
-        underline: Boolean,
-        color: String,
-        alignment: String,
-        firstLineIndent: Number,
+        fontBold: Boolean,
+        fontItalic: Boolean,
+        fontUnderLine: String,
+        fontColor: String,
+        formatLineSpacing: Number,
+        formatFirstLineIndent: Number,
+        formatAlignment: String,
+        formatLeftIndent: Number,
+        formatRightIndent: Number,
+        formatSpaceBefore: Number,
+        formatSpaceAfter: Number,
     }
 });
 
