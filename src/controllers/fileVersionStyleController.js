@@ -121,6 +121,57 @@ exports.deleteStyleInCurrentVersion = async (req, res, next) => {
     }
 }   
 
+exports.editStyleByIdInCurrentVersion = async (req, res, next) => {
+    try {
+        const userID = req.user.userID;
+        const {
+            filePackageID,
+            fileID,
+            versionID,
+            styleID,
+            data
+        } = req.body;
+
+        const filePackage = await FilePackage.findOne({ filePackageID: filePackageID, userID: userID });
+        if (!filePackage) {
+            next(new HttpsError('File package not found', 402));
+            return;
+        }
+
+        const file = filePackage.files.find(f => f.fileID === fileID);
+        if (!file) {
+            next(new HttpsError('File not found', 402));
+            return;
+        }
+
+        const version = file.historyXMLVersions.find(v => v.versionID === versionID);
+        if (!version) {
+            next(new HttpsError('Version not found', 402));
+            return;
+        }
+
+        const style = version.styleOfThisVersion.find(s => s.styleID === styleID);
+        if (!style) {
+            next(new HttpsError('Style not found', 402));
+            return;
+        }
+
+        // 更新样式数据
+        style.styleName = data.styleName;
+        style.data = data.data;
+
+        await filePackage.save();
+
+        res.status(200).json({
+            data: {
+                message: "Style updated successfully"
+            }
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
 exports.editStyleInCurrentVersion = async (req, res, next) => {
     try {
         const userID = req.user.userID;

@@ -7,6 +7,7 @@ const router = express.Router();
 router.post('/createStyleInCurrentVersion', verifyToken, fileVersionStyleController.createStyleInCurrentVersion);
 router.post('/deleteStyleInCurrentVersion', verifyToken, fileVersionStyleController.deleteStyleInCurrentVersion);
 router.post('/editStyleInCurrentVersion', verifyToken, fileVersionStyleController.editStyleInCurrentVersion);
+router.post('/editStyleByIdInCurrentVersion', verifyToken, fileVersionStyleController.editStyleByIdInCurrentVersion);
 
 module.exports = router;
 
