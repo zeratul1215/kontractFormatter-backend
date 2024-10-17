@@ -3,6 +3,46 @@ const FilePackage = require("../models/FilePackage");
 const HttpsError = require("../utils/HttpsError");
 const { v4: uuidv4 } = require('uuid');
 
+exports.getStylesIncurrentVersion = async(req, res, next) => {
+    try {
+        const { filePackageID, fileID, versionID } = req.params;
+        const userID = req.user.userID;
+
+        const filePackage = await FilePackage.findOne({ filePackageID: filePackageID, userID: userID });
+        if (!filePackage) {
+            next(new HttpsError('File package not found', 402));
+            return;
+        }
+
+        const file = filePackage.files.find(f => f.fileID === fileID);
+        if (!file) {
+            next(new HttpsError('File not found', 402));
+            return;
+        }
+
+        const version = file.historyXMLVersions.find(v => v.versionID === versionID);
+        if (!version) {
+            next(new HttpsError('Version not found', 402));
+            return;
+        }
+
+        const stylesData = {};
+        version.styleOfThisVersion.forEach(style => {
+            stylesData[style.styleID] = {
+                styleName: style.styleName,
+                data: style.data
+            };
+        });
+
+        res.status(200).json({
+            data: stylesData
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+
 exports.createStyleInCurrentVersion = async (req, res, next) => {
     try {
         const userID = req.user.userID;
