@@ -123,6 +123,11 @@ exports.deleteStyleInCurrentVersion = async (req, res, next) => {
             styleID
         } = req.body;
 
+        console.log("filePackageID: ", filePackageID);
+        console.log("fileID: ", fileID);
+        console.log("versionID: ", versionID);
+        console.log("styleID: ", styleID);
+
         const filePackage = await FilePackage.findOne({filePackageID: filePackageID, userID: userID});
         if (!filePackage) {
             next(new HttpsError('File package not found', 402));
