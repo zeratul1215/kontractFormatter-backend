@@ -61,7 +61,7 @@ exports.deleteStyleGroup = async (req, res, next) => {
     }
 }
 
-exports.getAllStyleGroups = async (req, res, next) => {
+exports.getNameOfAllStyleGroups = async (req, res, next) => {
     try {
         const userID = req.user.userID;
         
@@ -82,6 +82,35 @@ exports.getAllStyleGroups = async (req, res, next) => {
                 data: styleGroupsData
             }
         });
+    } catch (error) {
+        next(error);
+    }
+}
+
+exports.getStyleGroupDataByID = async (req, res, next) => {
+    try {
+        const userID = req.user.userID;
+        const { styleGroupID } = req.params;
+
+        const userData = await UserData.findOne({ userID: userID });
+        if (!userData) {
+            next(new HttpsError('User not found', 401));
+            return;
+        }
+
+        const styleGroup = userData.styleGroups.find(styleGroup => styleGroup.styleGroupID === styleGroupID);
+        if (!styleGroup) {
+            next(new HttpsError('Style group not found', 402));
+            return;
+        }
+
+        res.status(200).json({
+            data: {
+                message: 'success',
+                data: styleGroup
+            }
+        });
+
     } catch (error) {
         next(error);
     }
