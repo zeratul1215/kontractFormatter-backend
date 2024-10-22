@@ -260,6 +260,63 @@ exports.saveFileXMLAsNewVersion = async (req, res, next) => {
     }
 }
 
+exports.deleteFileVersion = async (req, res, next) => {
+    try {
+        const userID = req.user.userID;
+        const {
+            filePackageID,
+            fileID,
+            versionID
+        } = req.body;
+
+        // 查找对应的 FilePackage
+        const filePackage = await FilePackage.findOne({ filePackageID: filePackageID, userID: userID });
+        if (!filePackage) {
+            next(new HttpsError('File package not found', 404));
+            return;
+        }
+
+        // 查找指定的 file
+        const file = filePackage.files.find(f => f.fileID === fileID);
+        if (!file) {
+            next(new HttpsError('File not found', 404));
+            return;
+        }
+
+        // 确保文件至少有一个版本
+        if (file.historyXMLVersions.length <= 1) {
+            next(new HttpsError('Cannot delete the only version of a file', 400));
+            return;
+        }
+
+        // 查找并删除指定的 version
+        const versionIndex = file.historyXMLVersions.findIndex(v => v.versionID === versionID);
+        if (versionIndex === -1) {
+            next(new HttpsError('Version not found', 404));
+            return;
+        }
+
+        // 删除版本
+        file.historyXMLVersions.splice(versionIndex, 1);
+
+        // 如果删除的是当前版本，更新 currentVersionID
+        if (file.currentVersionID === versionID) {
+            file.currentVersionID = file.historyXMLVersions[file.historyXMLVersions.length - 1].versionID;
+        }
+
+        // 保存更改
+        await filePackage.save();
+
+        // 返回成功响应
+        res.status(200).json({
+            message: 'File version deleted successfully'
+        });
+    }
+    catch (error) {
+        next(error);
+    }
+}
+
 exports.addNewFileToFilePackage = async (req, res, next) => {
     try {
         const userID = req.user.userID;
@@ -314,6 +371,44 @@ exports.addNewFileToFilePackage = async (req, res, next) => {
             message: 'New file added successfully',
             fileID: newFile.fileID,
             versionID: newFile.historyXMLVersions[0].versionID
+        });
+    }
+    catch (error) {
+        next(error);
+    }
+}
+
+exports.deleteFile = async (req, res, next) => {
+    try {
+        const userID = req.user.userID;
+        const {
+            filePackageID,
+            fileID
+        } = req.body;
+
+        // 查找对应的 FilePackage
+        const filePackage = await FilePackage.findOne({ filePackageID: filePackageID, userID: userID });
+        if (!filePackage) {
+            next(new HttpsError('File package not found', 404));
+            return;
+        }
+
+        // 查找并删除指定的 file
+        const fileIndex = filePackage.files.findIndex(f => f.fileID === fileID);
+        if (fileIndex === -1) {
+            next(new HttpsError('File not found', 404));
+            return;
+        }
+
+        // 删除文件
+        filePackage.files.splice(fileIndex, 1);
+
+        // 保存更改
+        await filePackage.save();
+
+        // 返回成功响应
+        res.status(200).json({
+            message: 'File deleted successfully'
         });
     }
     catch (error) {

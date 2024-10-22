@@ -9,6 +9,8 @@ router.get('/getAllFilePackagesInfo', verifyToken, fileController.getAllFilePack
 router.get('/getFileXML/:filePackageID/:fileID/:versionID', verifyToken, fileController.getFileXML);
 router.post('/saveFileXMLAsExistingVersion', verifyToken, fileController.saveFileXMLAsExistingVersion);
 router.post('/saveFileXMLAsNewVersion', verifyToken, fileController.saveFileXMLAsNewVersion);
+router.post('/deleteFileVersion', verifyToken, fileController.deleteFileVersion);
 router.post('/addNewFileToFilePackage', verifyToken, fileController.addNewFileToFilePackage);
+router.post('/deleteFile', verifyToken, fileController.deleteFile);
 
 module.exports = router;
