@@ -208,6 +208,67 @@ exports.eraseAllStylesInCurrentVersion = async (req, res, next) => {
     }
 }
 
+exports.copyStyleFromStyleGroupInCurrentVersion = async (req, res, next) => {
+    try {
+        const userID = req.user.userID;
+        const {
+            filePackageID,
+            fileID,
+            versionID,
+            styleGroupID
+        } = req.body;
+        const filePackage = await FilePackage.findOne({ filePackageID: filePackageID, userID: userID });
+        if (!filePackage) {
+            next(new HttpsError('File package not found', 402));
+            return;
+        }
+
+        const file = filePackage.files.find(f => f.fileID === fileID);
+        if (!file) {
+            next(new HttpsError('File not found', 402));
+            return;
+        }
+
+        const version = file.historyXMLVersions.find(v => v.versionID === versionID);
+        if (!version) {
+            next(new HttpsError('Version not found', 402));
+            return;
+        }
+
+        const userData = await UserData.findOne({ userID: userID });
+        if (!userData) {
+            next(new HttpsError('User not found', 401));
+            return;
+        }
+
+        const styleGroup = userData.styleGroups.find(group => group.styleGroupID === styleGroupID);
+        if (!styleGroup) {
+            next(new HttpsError('Style group not found', 402));
+            return;
+        }
+
+        styleGroup.styles.forEach(style => {
+            const newStyle = {
+                styleID: uuidv4(),
+                styleName: style.styleName,
+                data: style.data
+            };
+            version.styleOfThisVersion.push(newStyle);
+        });
+
+        await filePackage.save();
+
+        res.status(200).json({
+            data: {
+                message: "Styles copied successfully"
+            }
+        });
+    }
+    catch (error) {
+        next(error);
+    }
+}
+
 exports.editStyleByIdInCurrentVersion = async (req, res, next) => {
     try {
         const userID = req.user.userID;

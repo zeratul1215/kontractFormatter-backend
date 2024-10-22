@@ -7,6 +7,7 @@ router.get('/getStylesInCurrentVersion/:filePackageID/:fileID/:versionID', verif
 router.post('/createStyleInCurrentVersion', verifyToken, fileVersionStyleController.createStyleInCurrentVersion);
 router.post('/deleteStyleInCurrentVersion', verifyToken, fileVersionStyleController.deleteStyleInCurrentVersion);
 router.post('/eraseAllStylesInCurrentVersion', verifyToken, fileVersionStyleController.eraseAllStylesInCurrentVersion);
+router.post('/copyStyleFromStyleGroupInCurrentVersion', verifyToken, fileVersionStyleController.copyStyleFromStyleGroupInCurrentVersion);
 router.post('/editStyleInCurrentVersion', verifyToken, fileVersionStyleController.editStyleInCurrentVersion);
 router.post('/editStyleByIdInCurrentVersion', verifyToken, fileVersionStyleController.editStyleByIdInCurrentVersion);
 
