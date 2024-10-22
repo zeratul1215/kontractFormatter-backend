@@ -37,7 +37,7 @@ exports.signUp = async (req, res, next) => {
             files: [{
                 fileID: process.env.FILE_ID,
                 fileName: 'initial file',
-                currentVersionID: process.env.VERSION_ID,
+                // currentVersionID: process.env.VERSION_ID,
                 historyXMLVersions: [{
                     versionID: process.env.VERSION_ID,
                     versionName: 'initial version',

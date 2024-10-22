@@ -11,7 +11,7 @@ const fileVersionSchema = new Schema({
     styleOfThisVersion: [styleSchema],
     numberingStyleOfThisVersion: numberingStyleSchema,
     // 之后确认后再进行修改
-    sectionInfo: { type: mongoose.Schema.Types.Mixed, required: true},
+    sectionInfo: { type: mongoose.Schema.Types.Mixed },
 });
 
 fileVersionSchema.pre('save', function(next){
@@ -22,7 +22,7 @@ fileVersionSchema.pre('save', function(next){
 const fileSchema = new Schema({
     fileID: { type: String, required: true},
     fileName: { type: String, required: true},
-    currentVersionID: { type: String, required: true},
+    // currentVersionID: { type: String, required: true},
     historyXMLVersions: [fileVersionSchema],
 });
 
