@@ -89,20 +89,6 @@ exports.getAllFilePackagesInfo = async (req, res, next) => { // 获取所有文�
             return;
         }
 
-        // 提取 filePackages 信息
-        // const filePackagesInfo = userData.filePackages.map(filePackage => ({
-        //     filePackageID: filePackage.filePackageID,
-        //     filePackageName: filePackage.filePackageName,
-        //     files: filePackage.files.map(file => ({
-        //         fileID: file.fileID,
-        //         fileName: file.fileName,
-        //         versions: file.historyXMLVersions.map(version => ({
-        //             versionID: version.versionID,
-        //             versionName: version.versionName
-        //         }))
-        //     }))
-        // }));
-
         const filePackagesInfo = userData.filePackages.reduce((acc, filePackage) => {
             acc[filePackage.filePackageID] = {
                 filePackageID: filePackage.filePackageID,
