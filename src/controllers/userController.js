@@ -1,5 +1,5 @@
 const AuthUser = require('../models/AuthUser');
-const FilePackage = require('../models/FilePackage');
+// const FilePackage = require('../models/FilePackage');
 const UserData = require('../models/UserData');
 const jwt = require('jsonwebtoken');
 // const bcrypt = require('bcrypt');
@@ -29,34 +29,34 @@ exports.signUp = async (req, res, next) => {
 
 
 
-        // 仅在测试时使用
-        const initialFilePackage = new FilePackage({
-            filePackageID: process.env.FILE_PACKAGE_ID,
-            filePackageName: 'iitial Package',
-            userID: newUser.userID,
-            files: [{
-                fileID: process.env.FILE_ID,
-                fileName: 'initial file',
-                // currentVersionID: process.env.VERSION_ID,
-                historyXMLVersions: [{
-                    versionID: process.env.VERSION_ID,
-                    versionName: 'initial version',
-                    versionXML: '<xml>Initial Content</xml>',
-                    sectionInfo: { "test": "test" },
-                    styleOfThisVersion: [],
-                    numberingStyleOfThisVersion: {
-                        numberingStyleID: 'defaultID', // 提供默认值
-                        numberingStyleName: 'defaultName' // 提供默认值
-                    }
-                }]
-            }]
-        });
+        // // 仅在测试时使用
+        // const initialFilePackage = new FilePackage({
+        //     filePackageID: process.env.FILE_PACKAGE_ID,
+        //     filePackageName: 'iitial Package',
+        //     userID: newUser.userID,
+        //     files: [{
+        //         fileID: process.env.FILE_ID,
+        //         fileName: 'initial file',
+        //         // currentVersionID: process.env.VERSION_ID,
+        //         historyXMLVersions: [{
+        //             versionID: process.env.VERSION_ID,
+        //             versionName: 'initial version',
+        //             versionXML: '<xml>Initial Content</xml>',
+        //             sectionInfo: { "test": "test" },
+        //             styleOfThisVersion: [],
+        //             numberingStyleOfThisVersion: {
+        //                 numberingStyleID: 'defaultID', // 提供默认值
+        //                 numberingStyleName: 'defaultName' // 提供默认值
+        //             }
+        //         }]
+        //     }]
+        // });
 
-        await initialFilePackage.save();
+        // await initialFilePackage.save();
 
         const newUserData = new UserData({
             userID: newUser.userID,
-            filePackages: [initialFilePackage._id],
+            filePackages: [],
             styleGroups: [],
             numberingStyles: []
         });
