@@ -8,7 +8,10 @@ const fileVersionSchema = new Schema({
     versionName: { type: String, required: true},
     versionXML: { type: String, required: true},
     updatedAt: { type: Date, required: true, default: Date.now},
+    //这是临时数据
     styleOfThisVersion: [styleSchema],
+    //这是持久化的数据
+    savedStylesOfThisVersion: [styleSchema],
     numberingStyleOfThisVersion: numberingStyleSchema,
     // 之后确认后再进行修改
     sectionInfo: { type: mongoose.Schema.Types.Mixed },

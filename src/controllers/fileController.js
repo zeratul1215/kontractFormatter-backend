@@ -150,6 +150,14 @@ exports.getFileXML = async (req, res, next) => {
             return;
         }
 
+        version.styleOfThisVersion = version.savedStylesOfThisVersion.map(style => ({
+            styleID: style.styleID,
+            styleName: style.styleName,
+            data: style.data
+        }));
+
+        await filePackage.save();
+
         // 返回 versionXML
         res.status(200).json({
             versionXML: version.versionXML
@@ -191,6 +199,11 @@ exports.saveFileXMLAsExistingVersion = async (req, res, next) => {
 
         // 更新 versionXML
         version.versionXML = versionXML;
+        version.savedStylesOfThisVersion = version.styleOfThisVersion.map(style => ({
+            styleID: style.styleID,
+            styleName: style.styleName,
+            data: style.data
+        }));
         await filePackage.save();
 
         // 返回成功响应
@@ -235,6 +248,11 @@ exports.saveFileXMLAsNewVersion = async (req, res, next) => {
             versionXML: versionXML,
             updatedAt: new Date(),
             styleOfThisVersion: Object.entries(styleData).map(([styleID, styleInfo]) => ({
+                styleID: styleID,
+                styleName: styleInfo.styleName,
+                data: styleInfo.data
+            })),
+            savedStylesOfThisVersion: Object.entries(styleData).map(([styleID, styleInfo]) => ({
                 styleID: styleID,
                 styleName: styleInfo.styleName,
                 data: styleInfo.data
@@ -354,6 +372,11 @@ exports.addNewFileToFilePackage = async (req, res, next) => {
                 versionXML: versionXML,
                 updatedAt: new Date(),
                 styleOfThisVersion: Object.entries(styleData).map(([styleID, styleInfo]) => ({
+                    styleID: styleID,
+                    styleName: styleInfo.styleName,
+                    data: styleInfo.data
+                })),
+                savedStylesOfThisVersion: Object.entries(styleData).map(([styleID, styleInfo]) => ({
                     styleID: styleID,
                     styleName: styleInfo.styleName,
                     data: styleInfo.data
