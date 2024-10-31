@@ -1,11 +1,12 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-const { styleSchema, numberingStyleSchema } = require('./styleSchema');
+const { styleSchema, numberingStyleSchema, sectionSchema } = require('./styleSchema');
 
 const styleGroupSchema = new Schema({
     styleGroupID: { type: String, required: true},
     styleGroupName: { type: String, required: true},
-    styles: [styleSchema]
+    styles: [styleSchema],
+    sections: [sectionSchema]
 });
 
 

@@ -22,10 +22,28 @@ const styleSchema = new Schema({
     }
 });
 
+const sectionSchema = new Schema({
+    sectionID: { type: String, required: true },
+    sectionName: { type: String, required: true },
+    data: {
+        hasHeader: Boolean,
+        hasFooter: Boolean,
+        headerLinkedStyleID: String,
+        footerLinkedStyleID: String,
+        headerContent: String,
+        footerContent: String,
+        pageNumberOn: Boolean,
+        pageNumberLocation: String, // 页码位置 header/footer
+        pageNumberFormer: String, // 页码前缀
+        pageNumberLatter: String, // 页码后缀
+        pageNumberFormat: String, // Arabic, Roman, Chinese
+    }
+});
+
 const numberingStyleSchema = new Schema({
     numberingStyleID: { type: String, required: true },
     numberingStyleName: { type: String, required: true },
     data: mongoose.Schema.Types.Mixed
 });
 
-module.exports = { styleSchema, numberingStyleSchema };
+module.exports = { styleSchema, numberingStyleSchema, sectionSchema };

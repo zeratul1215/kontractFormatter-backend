@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-const { styleSchema, numberingStyleSchema } = require('./styleSchema');
+const { styleSchema, numberingStyleSchema, sectionSchema } = require('./styleSchema');
 
 
 const fileVersionSchema = new Schema({
@@ -12,6 +12,8 @@ const fileVersionSchema = new Schema({
     styleOfThisVersion: [styleSchema],
     //这是持久化的数据
     savedStylesOfThisVersion: [styleSchema],
+    sectionsOfThisVersion: [sectionSchema],
+    savedSectionsOfThisVersion: [sectionSchema],
     numberingStyleOfThisVersion: numberingStyleSchema,
     // 之后确认后再进行修改
     sectionInfo: { type: mongoose.Schema.Types.Mixed },

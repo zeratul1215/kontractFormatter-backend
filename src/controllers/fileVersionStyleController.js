@@ -3,28 +3,18 @@ const FilePackage = require("../models/FilePackage");
 const HttpsError = require("../utils/HttpsError");
 const { v4: uuidv4 } = require('uuid');
 
-exports.getStylesIncurrentVersion = async(req, res, next) => {
+exports.getStylesAndSectionsIncurrentVersion = async(req, res, next) => {
     try {
         const { filePackageID, fileID, versionID } = req.params;
         const userID = req.user.userID;
 
-        const filePackage = await FilePackage.findOne({ filePackageID: filePackageID, userID: userID });
-        if (!filePackage) {
-            next(new HttpsError('File package not found', 402));
+        const result = await getVersion(filePackageID, fileID, versionID, userID);
+        if (result instanceof HttpsError) {
+            next(result);
             return;
         }
 
-        const file = filePackage.files.find(f => f.fileID === fileID);
-        if (!file) {
-            next(new HttpsError('File not found', 402));
-            return;
-        }
-
-        const version = file.historyXMLVersions.find(v => v.versionID === versionID);
-        if (!version) {
-            next(new HttpsError('Version not found', 402));
-            return;
-        }
+        const { filePackage, version } = result;
 
         const stylesData = {};
         version.styleOfThisVersion.forEach(style => {
@@ -34,8 +24,19 @@ exports.getStylesIncurrentVersion = async(req, res, next) => {
             };
         });
 
+        const sectionsData = {};
+        version.sectionsOfThisVersion.forEach(section => {
+            sectionsData[section.sectionID] = {
+                sectionName: section.sectionName,
+                data: section.data
+            }
+        });
+
         res.status(200).json({
-            data: stylesData
+            data: {
+                stylesData: stylesData,
+                sectionsData: sectionsData
+            }
         });
     } catch (error) {
         next(error);
@@ -53,23 +54,13 @@ exports.createStyleInCurrentVersion = async (req, res, next) => {
             styleName
         } = req.body;
 
-        const filePackage = await FilePackage.findOne({filePackageID: filePackageID, userID: userID});
-        if (!filePackage) {
-            next(new HttpsError('File package not found', 402));
+        const result = await getVersion(filePackageID, fileID, versionID, userID);
+        if (result instanceof HttpsError) {
+            next(result);
             return;
         }
 
-        const file = filePackage.files.find(f => f.fileID === fileID);
-        if (!file) {
-            next(new HttpsError('File not found', 402));
-            return;
-        }
-
-        const version = file.historyXMLVersions.find(v => v.versionID === versionID);
-        if (!version) {
-            next(new HttpsError('Version not found', 402));
-            return;
-        }
+        const { filePackage, version } = result;
 
         const style = version.styleOfThisVersion.find(s => s.styleName === styleName);
         if (style) {
@@ -123,28 +114,13 @@ exports.deleteStyleInCurrentVersion = async (req, res, next) => {
             styleID
         } = req.body;
 
-        console.log("filePackageID: ", filePackageID);
-        console.log("fileID: ", fileID);
-        console.log("versionID: ", versionID);
-        console.log("styleID: ", styleID);
-
-        const filePackage = await FilePackage.findOne({filePackageID: filePackageID, userID: userID});
-        if (!filePackage) {
-            next(new HttpsError('File package not found', 402));
+        const result = await getVersion(filePackageID, fileID, versionID, userID);
+        if (result instanceof HttpsError) {
+            next(result);
             return;
         }
 
-        const file = filePackage.files.find(f => f.fileID === fileID);
-        if (!file) {
-            next(new HttpsError('File not found', 402));
-            return;
-        }
-
-        const version = file.historyXMLVersions.find(v => v.versionID === versionID);
-        if (!version) {
-            next(new HttpsError('Version not found', 402));
-            return;
-        }
+        const { filePackage, version } = result;
 
         const styleIndex = version.styleOfThisVersion.findIndex(s => s.styleID === styleID);
         if (styleIndex === -1) {
@@ -164,7 +140,102 @@ exports.deleteStyleInCurrentVersion = async (req, res, next) => {
     catch (error) {
         next(error);
     }
-}   
+}
+
+exports.createSectionInCurrentVersion = async (req, res, next) => {
+    try {
+        const userID = req.user.userID;
+        const {
+            filePackageID,
+            fileID,
+            versionID,
+            sectionName
+        } = req.body;
+
+        const result = await getVersion(filePackageID, fileID, versionID, userID);
+        if (result instanceof HttpsError) {
+            next(result);
+            return;
+        }
+
+        const { filePackage, version } = result;
+
+        // 检查section名称是否已存在
+        const section = version.sectionsOfThisVersion.find(s => s.sectionName === sectionName);
+        if (section) {
+            next(new HttpsError('Section already exists', 402));
+            return;
+        }
+
+        // 创建新的section对象，设置默认值
+        const newSection = {
+            sectionID: uuidv4(),
+            sectionName: sectionName,
+            data: {
+                hasHeader: false,
+                hasFooter: false,
+                headerLinkedStyleID: '',
+                footerLinkedStyleID: '',
+                headerContent: '',
+                footerContent: '',
+                pageNumberOn: false,
+                pageNumberLocation: 'footer',
+                pageNumberFormer: '',
+                pageNumberLatter: '',
+                pageNumberFormat: 'Arabic'
+            }
+        }
+
+        version.sectionsOfThisVersion.push(newSection);
+        await filePackage.save();
+
+        res.status(200).json({
+            data: {
+                message: "success",
+                sectionID: newSection.sectionID
+            }
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+exports.deleteSectionInCurrentVersion = async (req, res, next) => {
+    try {
+        const userID = req.user.userID;
+        const {
+            filePackageID,
+            fileID,
+            versionID,
+            sectionID
+        } = req.body;
+
+        const result = await getVersion(filePackageID, fileID, versionID, userID);
+        if (result instanceof HttpsError) {
+            next(result);
+            return;
+        }
+
+        const { filePackage, version } = result;
+
+        const sectionIndex = version.sectionsOfThisVersion.findIndex(s => s.sectionID === sectionID);
+        if (sectionIndex === -1) {
+            next(new HttpsError('Section not found', 402));
+            return;
+        }
+
+        version.sectionsOfThisVersion.splice(sectionIndex, 1);
+        await filePackage.save();
+
+        res.status(200).json({
+            data: {
+                message: "Section deleted successfully"
+            }
+        });
+    } catch (error) {
+        next(error);
+    }
+}
 
 exports.eraseAllStylesInCurrentVersion = async (req, res, next) => {
     try {
@@ -174,23 +245,14 @@ exports.eraseAllStylesInCurrentVersion = async (req, res, next) => {
             fileID,
             versionID
         } = req.body;
-        const filePackage = await FilePackage.findOne({ filePackageID: filePackageID, userID: userID });
-        if (!filePackage) {
-            next(new HttpsError('File package not found', 402));
+        
+        const result = await getVersion(filePackageID, fileID, versionID, userID);
+        if (result instanceof HttpsError) {
+            next(result);
             return;
         }
 
-        const file = filePackage.files.find(f => f.fileID === fileID);
-        if (!file) {
-            next(new HttpsError('File not found', 402));
-            return;
-        }
-
-        const version = file.historyXMLVersions.find(v => v.versionID === versionID);
-        if (!version) {
-            next(new HttpsError('Version not found', 402));
-            return;
-        }
+        const { filePackage, version } = result;
 
         // 清空样式数据
         version.styleOfThisVersion = [];
@@ -208,6 +270,71 @@ exports.eraseAllStylesInCurrentVersion = async (req, res, next) => {
     }
 }
 
+exports.eraseAllSectionsInCurrentVersion = async (req, res, next) => {
+    try {
+        const userID = req.user.userID;
+        const {
+            filePackageID,
+            fileID,
+            versionID
+        } = req.body;
+        
+        const result = await getVersion(filePackageID, fileID, versionID, userID);
+        if (result instanceof HttpsError) {
+            next(result);
+            return;
+        }
+
+        const { filePackage, version } = result;
+
+        version.sectionsOfThisVersion = [];
+        await filePackage.save();
+
+        res.status(200).json({
+            data: {
+                message: "All sections deleted successfully"
+            }
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+exports.eraseAllStylesAndSectionsInCurrentVersion = async (req, res, next) => {
+    try {
+        const userID = req.user.userID;
+        const {
+            filePackageID,
+            fileID,
+            versionID
+        } = req.body;
+        
+        const result = await getVersion(filePackageID, fileID, versionID, userID);
+        if (result instanceof HttpsError) {
+            next(result);
+            return;
+        }
+
+        const { filePackage, version } = result;
+
+        // 清空样式数据
+        version.styleOfThisVersion = [];
+        // 清空section数据
+        version.sectionsOfThisVersion = [];
+
+        await filePackage.save();
+
+        res.status(200).json({
+            data: {
+                message: "All styles and sections deleted successfully"
+            }
+        });
+    }
+    catch (error) {
+        next(error);
+    }
+}
+
 exports.copyStyleFromStyleGroupInCurrentVersion = async (req, res, next) => {
     try {
         const userID = req.user.userID;
@@ -217,23 +344,14 @@ exports.copyStyleFromStyleGroupInCurrentVersion = async (req, res, next) => {
             versionID,
             styleGroupID
         } = req.body;
-        const filePackage = await FilePackage.findOne({ filePackageID: filePackageID, userID: userID });
-        if (!filePackage) {
-            next(new HttpsError('File package not found', 402));
+        
+        const result = await getVersion(filePackageID, fileID, versionID, userID);
+        if (result instanceof HttpsError) {
+            next(result);
             return;
         }
 
-        const file = filePackage.files.find(f => f.fileID === fileID);
-        if (!file) {
-            next(new HttpsError('File not found', 402));
-            return;
-        }
-
-        const version = file.historyXMLVersions.find(v => v.versionID === versionID);
-        if (!version) {
-            next(new HttpsError('Version not found', 402));
-            return;
-        }
+        const { filePackage, version } = result;
 
         const userData = await UserData.findOne({ userID: userID });
         if (!userData) {
@@ -269,6 +387,115 @@ exports.copyStyleFromStyleGroupInCurrentVersion = async (req, res, next) => {
     }
 }
 
+exports.copySectionFromStyleGroupInCurrentVersion = async (req, res, next) => {
+    try {
+        const userID = req.user.userID;
+        const {
+            filePackageID,
+            fileID,
+            versionID,
+            styleGroupID
+        } = req.body;
+        
+        const result = await getVersion(filePackageID, fileID, versionID, userID);
+        if (result instanceof HttpsError) {
+            next(result);
+            return;
+        }
+
+        const { filePackage, version } = result;
+
+        const userData = await UserData.findOne({ userID: userID });
+        if (!userData) {
+            next(new HttpsError('User not found', 401));
+            return;
+        }
+
+        const styleGroup = userData.styleGroups.find(group => group.styleGroupID === styleGroupID);
+        if (!styleGroup) {
+            next(new HttpsError('Style group not found', 402));
+            return;
+        }
+
+        styleGroup.sections.forEach(section => {
+            const newSection = {
+                sectionID: uuidv4(),
+                sectionName: section.sectionName,
+                data: section.data
+            };
+        });
+
+        await filePackage.save();
+
+        res.status(200).json({
+            data: {
+                message: "Sections copied successfully"
+            }
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+exports.copyStyleAndSectionFromStyleGroupInCurrentVersion = async (req, res, next) => {
+    try {
+        const userID = req.user.userID;
+        const {
+            filePackageID,
+            fileID,
+            versionID,
+            styleGroupID
+        } = req.body;
+        
+        const result = await getVersion(filePackageID, fileID, versionID, userID);
+        if (result instanceof HttpsError) {
+            next(result);
+            return;
+        }
+
+        const { filePackage, version } = result;
+
+        const userData = await UserData.findOne({ userID: userID });
+        if (!userData) {
+            next(new HttpsError('User not found', 401));
+            return;
+        }
+
+        const styleGroup = userData.styleGroups.find(group => group.styleGroupID === styleGroupID);
+        if (!styleGroup) {
+            next(new HttpsError('Style group not found', 402));
+            return;
+        }
+
+        styleGroup.styles.forEach(style => {
+            const newStyle = {
+                styleID: uuidv4(),
+                styleName: style.styleName,
+                data: style.data
+            };
+            version.styleOfThisVersion.push(newStyle);
+        });
+
+        styleGroup.sections.forEach(section => {
+            const newSection = {
+                sectionID: uuidv4(),
+                sectionName: section.sectionName,
+                data: section.data
+            };
+        });
+
+        await filePackage.save();
+
+        res.status(200).json({
+            data: {
+                message: "Styles and sections copied successfully"
+            }
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
 exports.editStyleByIdInCurrentVersion = async (req, res, next) => {
     try {
         const userID = req.user.userID;
@@ -280,23 +507,13 @@ exports.editStyleByIdInCurrentVersion = async (req, res, next) => {
             data
         } = req.body;
 
-        const filePackage = await FilePackage.findOne({ filePackageID: filePackageID, userID: userID });
-        if (!filePackage) {
-            next(new HttpsError('File package not found', 402));
+        const result = await getVersion(filePackageID, fileID, versionID, userID);
+        if (result instanceof HttpsError) {
+            next(result);
             return;
         }
 
-        const file = filePackage.files.find(f => f.fileID === fileID);
-        if (!file) {
-            next(new HttpsError('File not found', 402));
-            return;
-        }
-
-        const version = file.historyXMLVersions.find(v => v.versionID === versionID);
-        if (!version) {
-            next(new HttpsError('Version not found', 402));
-            return;
-        }
+        const { filePackage, version } = result;
 
         const style = version.styleOfThisVersion.find(s => s.styleID === styleID);
         if (!style) {
@@ -330,23 +547,13 @@ exports.editStyleInCurrentVersion = async (req, res, next) => {
             data
         } = req.body;
 
-        const filePackage = await FilePackage.findOne({filePackageID: filePackageID, userID: userID});
-        if (!filePackage) {
-            next(new HttpsError('File package not found', 402));
+        const result = await getVersion(filePackageID, fileID, versionID, userID);
+        if (result instanceof HttpsError) {
+            next(result);
             return;
         }
 
-        const file = filePackage.files.find(f => f.fileID === fileID);
-        if (!file) {
-            next(new HttpsError('File not found', 402));
-            return;
-        }
-
-        const version = file.historyXMLVersions.find(v => v.versionID === versionID);
-        if (!version) {
-            next(new HttpsError('Version not found', 402));
-            return;
-        }
+        const { filePackage, version } = result;
 
         for (const [styleID, styleData] of Object.entries(data)) {
             const style = version.styleOfThisVersion.find(s => s.styleID === styleID);
@@ -371,4 +578,137 @@ exports.editStyleInCurrentVersion = async (req, res, next) => {
     }
 }
 
+exports.editSectionInCurrentVersion = async (req, res, next) => {
+    try {
+        const userID = req.user.userID;
+        const {
+            filePackageID,
+            fileID,
+            versionID,
+            data
+        } = req.body;
 
+        const result = await getVersion(filePackageID, fileID, versionID, userID);
+        if (result instanceof HttpsError) {
+            next(result);
+            return;
+        }
+
+        const { filePackage, version } = result;
+
+        for (const [sectionID, sectionData] of Object.entries(data)) {
+            const section = version.sectionsOfThisVersion.find(s => s.sectionID === sectionID);
+            if (!section) {
+                next(new HttpsError(`Section with ID ${sectionID} not found`, 402));
+                return;
+            }
+
+            section.sectionName = sectionData.sectionName;
+            section.data = sectionData.data;
+        }
+
+        await filePackage.save();
+
+        res.status(200).json({
+            data: {
+                message: "Sections updated successfully"
+            }
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+exports.restoreStyleDataToSaved = async (req, res, next) => {
+    try {
+        const userID = req.user.userID;
+        const {
+            filePackageID,
+            fileID,
+            versionID
+        } = req.body;
+
+        const result = await getVersion(filePackageID, fileID, versionID, userID);
+
+        if (result instanceof HttpsError) {
+            next(result);
+            return;
+        }
+
+        const { filePackage, version } = result;
+
+        version.styleOfThisVersion = version.savedStylesOfThisVersion.map(style => ({
+            styleID: style.styleID,
+            styleName: style.styleName,
+            data: {
+                ...style.data
+            }
+        }));
+
+        await filePackage.save();
+
+        res.status(200).json({
+            data: {
+                message: "Style data restored successfully"
+            }
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+exports.restoreSectionDataToSaved = async (req, res, next) => {
+    try {
+        const userID = req.user.userID;
+        const {
+            filePackageID,
+            fileID,
+            versionID
+        } = req.body;
+
+        const result = await getVersion(filePackageID, fileID, versionID, userID);
+
+        if (result instanceof HttpsError) {
+            next(result);
+            return;
+        }
+
+        const { filePackage, version } = result;
+        version.sectionsOfThisVersion = version.savedSectionsOfThisVersion.map(section => ({
+            sectionID: section.sectionID,
+            sectionName: section.sectionName,
+            data: {
+                ...section.data
+            }
+        }));
+
+        await filePackage.save();
+
+        res.status(200).json({
+            data: {
+                message: "Section data restored successfully"
+            }
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+const getVersion = async (filePackageID, fileID, versionID, userID) => {
+    const filePackage = await FilePackage.findOne({filePackageID: filePackageID, userID: userID});
+    if (!filePackage) {
+        return new HttpsError('File package not found', 402);
+    }
+
+    const file = filePackage.files.find(f => f.fileID === fileID);
+    if (!file) {
+        return new HttpsError('File not found', 402);
+    }
+
+    const version = file.historyXMLVersions.find(v => v.versionID === versionID);
+    if (!version) {
+        return new HttpsError('Version not found', 402);
+    }
+
+    return { filePackage, version };
+}

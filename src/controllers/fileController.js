@@ -156,6 +156,12 @@ exports.getFileXML = async (req, res, next) => {
             data: style.data
         }));
 
+        version.sectionsOfThisVersion = version.savedSectionsOfThisVersion.map(section => ({
+            sectionID: section.sectionID,
+            sectionName: section.sectionName,
+            data: section.data
+        }));
+
         await filePackage.save();
 
         // 返回 versionXML
@@ -225,6 +231,7 @@ exports.saveFileXMLAsNewVersion = async (req, res, next) => {
             versionName,
             versionXML,
             styleData,
+            sectionData
         } = req.body;
 
         // 查找对应的 FilePackage
@@ -256,6 +263,16 @@ exports.saveFileXMLAsNewVersion = async (req, res, next) => {
                 styleID: styleID,
                 styleName: styleInfo.styleName,
                 data: styleInfo.data
+            })),
+            sectionsOfThisVersion: Object.entries(sectionData).map(([sectionID, sectionInfo]) => ({
+                sectionID: sectionID,
+                sectionName: sectionInfo.sectionName,
+                data: sectionInfo.data
+            })),
+            savedSectionsOfThisVersion: Object.entries(sectionData).map(([sectionID, sectionInfo]) => ({
+                sectionID: sectionID,
+                sectionName: sectionInfo.sectionName,
+                data: sectionInfo.data
             })),
             numberingStyleOfThisVersion: {
                 numberingStyleID: uuidv4(),
@@ -352,6 +369,7 @@ exports.addNewFileToFilePackage = async (req, res, next) => {
             versionName,
             versionXML,
             styleData,
+            sectionData
         } = req.body;
 
         // 查找对应的 FilePackage
@@ -380,6 +398,16 @@ exports.addNewFileToFilePackage = async (req, res, next) => {
                     styleID: styleID,
                     styleName: styleInfo.styleName,
                     data: styleInfo.data
+                })),
+                sectionsOfThisVersion: Object.entries(sectionData).map(([sectionID, sectionInfo]) => ({
+                    sectionID: sectionID,
+                    sectionName: sectionInfo.sectionName,
+                    data: sectionInfo.data
+                })),
+                savedSectionsOfThisVersion: Object.entries(sectionData).map(([sectionID, sectionInfo]) => ({
+                    sectionID: sectionID,
+                    sectionName: sectionInfo.sectionName,
+                    data: sectionInfo.data
                 })),
                 numberingStyleOfThisVersion: {
                     numberingStyleID: uuidv4(),
