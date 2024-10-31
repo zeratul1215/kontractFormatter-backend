@@ -10,7 +10,8 @@ exports.createStyleGroup = async (req, res, next) => {
         const newStyleGroup = {
             styleGroupID: uuidv4(),
             styleGroupName: styleGroupName,
-            styles: []
+            styles: [],
+            sections: []
         }
 
         const userData = await UserData.findOne({ userID: userID });
@@ -134,7 +135,8 @@ exports.saveCurrentStylesAsGroup = async (req, res, next) => {
         const userID = req.user.userID;
         const {
             styleGroupName,
-            data
+            styleData,
+            sectionData
         } = req.body;
         // 查找用户数据
         const userData = await UserData.findOne({ userID: userID });
@@ -154,7 +156,8 @@ exports.saveCurrentStylesAsGroup = async (req, res, next) => {
         const newStyleGroup = {
             styleGroupID: uuidv4(),
             styleGroupName: styleGroupName,
-            styles: []
+            styles: [],
+            sections: []
         };
 
         // 将data中的样式添加到样式组中
@@ -165,6 +168,16 @@ exports.saveCurrentStylesAsGroup = async (req, res, next) => {
                 data: styleData.data
             };
             newStyleGroup.styles.push(newStyle);
+        }
+
+        // 将data中的段落添加到样式组中
+        for (const [sectionID, sectionData] of Object.entries(sectionData)) {
+            const newSection = {
+                sectionID: sectionID,
+                sectionName: sectionData.sectionName,
+                data: sectionData.data
+            };
+            newStyleGroup.sections.push(newSection);
         }
 
         // 将新的样式组添加到用户数据中
