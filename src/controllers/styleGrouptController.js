@@ -161,7 +161,7 @@ exports.saveCurrentStylesAsGroup = async (req, res, next) => {
         };
 
         // 将data中的样式添加到样式组中
-        for (const [styleID, styleData] of Object.entries(data)) {
+        for (const [styleID, styleData] of Object.entries(styleData)) {
             const newStyle = {
                 styleID: styleID,
                 styleName: styleData.styleName,
