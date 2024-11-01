@@ -423,6 +423,7 @@ exports.copySectionFromStyleGroupInCurrentVersion = async (req, res, next) => {
                 sectionName: section.sectionName,
                 data: section.data
             };
+            version.sectionsOfThisVersion.push(newSection);
         });
 
         await filePackage.save();
@@ -482,6 +483,7 @@ exports.copyStyleAndSectionFromStyleGroupInCurrentVersion = async (req, res, nex
                 sectionName: section.sectionName,
                 data: section.data
             };
+            version.sectionsOfThisVersion.push(newSection);
         });
 
         await filePackage.save();
