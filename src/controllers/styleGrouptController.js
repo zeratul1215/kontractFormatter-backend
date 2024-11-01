@@ -161,21 +161,21 @@ exports.saveCurrentStylesAsGroup = async (req, res, next) => {
         };
 
         // 将data中的样式添加到样式组中
-        for (const [styleID, styleData] of Object.entries(styleData)) {
+        for (const [styleID, data] of Object.entries(styleData)) {
             const newStyle = {
                 styleID: styleID,
-                styleName: styleData.styleName,
-                data: styleData.data
+                styleName: data.styleName,
+                data: data.data
             };
             newStyleGroup.styles.push(newStyle);
         }
 
         // 将data中的段落添加到样式组中
-        for (const [sectionID, sectionData] of Object.entries(sectionData)) {
+        for (const [sectionID, data] of Object.entries(sectionData)) {
             const newSection = {
                 sectionID: sectionID,
-                sectionName: sectionData.sectionName,
-                data: sectionData.data
+                sectionName: data.sectionName,
+                data: data.data
             };
             newStyleGroup.sections.push(newSection);
         }
