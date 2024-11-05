@@ -29,50 +29,41 @@ exports.signUp = async (req, res, next) => {
 
 
 
-        // // 仅在测试时使用
-        // const initialFilePackage = new FilePackage({
-        //     filePackageID: process.env.FILE_PACKAGE_ID,
-        //     filePackageName: 'iitial Package',
-        //     userID: newUser.userID,
-        //     files: [{
-        //         fileID: process.env.FILE_ID,
-        //         fileName: 'initial file',
-        //         // currentVersionID: process.env.VERSION_ID,
-        //         historyXMLVersions: [{
-        //             versionID: process.env.VERSION_ID,
-        //             versionName: 'initial version',
-        //             versionXML: '<xml>Initial Content</xml>',
-        //             sectionInfo: { "test": "test" },
-        //             styleOfThisVersion: [],
-        //             numberingStyleOfThisVersion: {
-        //                 numberingStyleID: 'defaultID', // 提供默认值
-        //                 numberingStyleName: 'defaultName' // 提供默认值
-        //             }
-        //         }]
-        //     }]
-        // });
+        // 创建临时文件包
+        const tempFilePackage = new FilePackage({
+            filePackageID: process.env.TEMP_FILE_PACKAGE_ID,
+            filePackageName: 'temp file Package',
+            userID: newUser.userID,
+            files: [{
+                fileID: process.env.TEMP_FILE_ID,
+                fileName: 'temp file',
+                // currentVersionID: process.env.TEMP_VERSION_ID,
+                historyXMLVersions: [{
+                    versionID: process.env.VERSION_ID,
+                    versionName: 'temp version',
+                    versionXML: '<xml>temp Content</xml>',
+                    styleOfThisVersion: [],
+                    savedStylesOfThisVersion: [],
+                    sectionsOfThisVersion: [],
+                    savedSectionsOfThisVersion: [],
+                    numberingStyleOfThisVersion: {
+                        numberingStyleID: 'defaultID', // 提供默认值
+                        numberingStyleName: 'defaultName' // 提供默认值
+                    }
+                }]
+            }]
+        });
 
-        // await initialFilePackage.save();
+        await tempFilePackage.save();
 
         const newUserData = new UserData({
             userID: newUser.userID,
-            filePackages: [],
+            filePackages: [tempFilePackage._id],
             styleGroups: [],
             numberingStyles: []
         });
 
         await newUserData.save();
-
-
-        // 创建userData 正式应该用这个，但是目前测试先用上面的代码
-        // const newUserData = new UserData({
-        //     userID: newUser.userID,
-        //     filePackages: [],
-        //     styleGroups: [],
-        //     numberingStyles: []
-        // });
-
-        // await newUserData.save();
 
         const token = jwt.sign({ userID: newUser.userID }, process.env.JWT_SECRET, { expiresIn: '10000h' });
 
@@ -98,6 +89,7 @@ exports.signIn = async (req, res, next) => {
         if(!isMatch){
             return res.status(401).json({ message: 'Invalid password' });
         }
+
 
         const token = jwt.sign({ userID: user.userID }, process.env.JWT_SECRET, { expiresIn: '10000h' });
 

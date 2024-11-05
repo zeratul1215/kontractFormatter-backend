@@ -19,7 +19,7 @@ router.post('/editStyleByIdInCurrentVersion', verifyToken, fileVersionStyleContr
 router.post('/editSectionInCurrentVersion', verifyToken, fileVersionStyleController.editSectionInCurrentVersion);
 router.post('/restoreStyleDataToSaved', verifyToken, fileVersionStyleController.restoreStyleDataToSaved);
 router.post('/restoreSectionDataToSaved', verifyToken, fileVersionStyleController.restoreSectionDataToSaved);
-
+router.post('/eraseAllDataInTempFilePackage', verifyToken, fileVersionStyleController.eraseAllDataInTempFilePackage);
 
 module.exports = router;
 

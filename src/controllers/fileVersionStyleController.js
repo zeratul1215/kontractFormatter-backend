@@ -696,6 +696,43 @@ exports.restoreSectionDataToSaved = async (req, res, next) => {
     }
 }
 
+exports.eraseAllDataInTempFilePackage = async (req, res, next) => {
+    try {
+        const userID = req.user.userID;
+
+        // 查找用户的临时文件包
+        const tempFilePackage = await FilePackage.findOne({ 
+            userID: userID, 
+            filePackageName: 'temp file package'
+        });
+
+        if (!tempFilePackage) {
+            next(new HttpsError('Temp file package not found', 404));
+            return;
+        }
+
+        // 清空所有文件中的相关数据
+        tempFilePackage.files.forEach(file => {
+            file.historyXMLVersions.forEach(version => {
+                // 清空样式和章节数据
+                version.styleOfThisVersion = [];
+                version.savedStylesOfThisVersion = [];
+                version.sectionsOfThisVersion = [];
+                version.savedSectionsOfThisVersion = [];
+            });
+        });
+
+        // 保存更改
+        await tempFilePackage.save();
+
+        res.status(200).json({
+            message: 'Temp file package data erased successfully'
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
 const getVersion = async (filePackageID, fileID, versionID, userID) => {
     const filePackage = await FilePackage.findOne({filePackageID: filePackageID, userID: userID});
     if (!filePackage) {
@@ -714,3 +751,4 @@ const getVersion = async (filePackageID, fileID, versionID, userID) => {
 
     return { filePackage, version };
 }
+

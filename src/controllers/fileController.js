@@ -90,6 +90,10 @@ exports.getAllFilePackagesInfo = async (req, res, next) => { // 获取所有文�
         }
 
         const filePackagesInfo = userData.filePackages.reduce((acc, filePackage) => {
+            if(filePackage.filePackageName === 'temp file Package'){
+                return acc;
+            }
+            
             acc[filePackage.filePackageID] = {
                 filePackageID: filePackage.filePackageID,
                 filePackageName: filePackage.filePackageName,
