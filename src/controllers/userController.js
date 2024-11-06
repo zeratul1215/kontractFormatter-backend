@@ -1,5 +1,5 @@
 const AuthUser = require('../models/AuthUser');
-// const FilePackage = require('../models/FilePackage');
+const FilePackage = require('../models/FilePackage');
 const UserData = require('../models/UserData');
 const jwt = require('jsonwebtoken');
 // const bcrypt = require('bcrypt');
@@ -39,7 +39,7 @@ exports.signUp = async (req, res, next) => {
                 fileName: 'temp file',
                 // currentVersionID: process.env.TEMP_VERSION_ID,
                 historyXMLVersions: [{
-                    versionID: process.env.VERSION_ID,
+                    versionID: process.env.TEMP_VERSION_ID,
                     versionName: 'temp version',
                     versionXML: '<xml>temp Content</xml>',
                     styleOfThisVersion: [],
