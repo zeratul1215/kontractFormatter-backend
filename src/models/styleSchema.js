@@ -36,7 +36,8 @@ const sectionSchema = new Schema({
         pageNumberLocation: String, // 页码位置 header/footer
         pageNumberFormer: String, // 页码前缀
         pageNumberLatter: String, // 页码后缀
-        pageNumberFormat: String, // Arabic, Roman, Chinese
+        pageNumberRestart: Boolean, // 页码重新开始
+        // pageNumberFormat: String, // Arabic, Roman, Chinese
         // startFromOne: Boolean,
     }
 });
